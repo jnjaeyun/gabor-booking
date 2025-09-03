@@ -299,8 +299,11 @@ if __name__ == '__main__':
     init_db()
     print("🎬 가보르 보디 예매 시스템이 시작됩니다!")
     print("👉 http://localhost:5000 에서 확인하세요")
-
     app.run(debug=True, host='0.0.0.0', port=5000)
+else:
+    # Vercel용
+    init_db()
+
 
 
 
