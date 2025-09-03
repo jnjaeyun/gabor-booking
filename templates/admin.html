@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>관리자 페이지</title>
+    <style>
+        body { font-family: Arial; background: #2c3e50; margin: 0; padding: 20px; color: white; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        .title { font-size: 28px; margin-bottom: 30px; text-align: center; }
+        .stats { display: flex; gap: 20px; margin-bottom: 30px; }
+        .stat-box { flex: 1; background: #34495e; padding: 20px; border-radius: 10px; text-align: center; }
+        .stat-number { font-size: 24px; font-weight: bold; color: #3498db; }
+        .booking-list { background: white; color: #333; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
+        .booking-item { border-bottom: 1px solid #eee; padding: 15px 0; }
+        .booking-item:last-child { border-bottom: none; }
+        .btn { padding: 12px 24px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; margin: 5px; }
+        .danger-btn { background: #e74c3c; color: white; }
+        .danger-btn:hover { background: #c0392b; }
+        .primary-btn { background: #3498db; color: white; }
+        .primary-btn:hover { background: #2980b9; }
+        .actions { text-align: center; margin-top: 30px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">가보르 보디 예매 관리</h1>
+        
+        <div class="stats">
+            <div class="stat-box">
+                <div class="stat-number" id="totalBookings">0</div>
+                <div>총 예매 건수</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number" id="totalSeats">0</div>
+                <div>예매된 좌석 수</div>
+            </div>
+        </div>
+
+        <div class="booking-list">
+            <h3>예매 목록</h3>
+            <div id="bookingList">로딩 중...</div>
+        </div>
+
+     <div class="actions">
+    <button class="btn danger-btn" onclick="cancelAllBookings()">모든 예매 일괄 취소</button>
+    <button class="btn primary-btn" onclick="refreshData()">새로고침</button>
+    <button class="btn primary-btn" onclick="downloadExcel()">예매자 명단 다운로드</button>
+    <button class="btn primary-btn" onclick="goHome()">메인으로 돌아가기</button>
+</div>
+
+    <script>
+        // 페이지 로드 시 데이터 가져오기
+        document.addEventListener('DOMContentLoaded', loadBookings);
+
+        async function loadBookings() {
+            try {
+                const response = await fetch('/api/admin/bookings');
+                const bookings = await response.json();
+                
+                displayBookings(bookings);
+                updateStats(bookings);
+            } catch (error) {
+                document.getElementById('bookingList').innerHTML = '데이터를 불러오는데 실패했습니다.';
+            }
+        }
+
+   function displayBookings(bookings) {
+    const listDiv = document.getElementById('bookingList');
+    
+    if (bookings.length === 0) {
+        listDiv.innerHTML = '<p>예매 내역이 없습니다.</p>';
+        return;
+    }
+
+    let html = '';
+    bookings.forEach(booking => {
+        html += `
+            <div class="booking-item">
+                <strong>예매번호:</strong> ${booking.booking_number} | 
+                <strong>이름:</strong> ${booking.name} | 
+                <strong>이메일:</strong> ${booking.email} | 
+                <strong>연락처:</strong> ${booking.phone}<br>
+                <strong>좌석:</strong> ${booking.seats.join(', ')} | 
+                <strong>예매일:</strong> ${new Date(booking.created_at).toLocaleString('ko-KR')}
+                <button onclick="cancelSingleBooking(${booking.id})" style="background: #e74c3c; color: white; border: none; padding: 5px 10px; margin-left: 10px; border-radius: 3px; cursor: pointer;">취소</button>
+            </div>
+        `;
+    });
+    
+    listDiv.innerHTML = html;
+}
+
+        function updateStats(bookings) {
+            document.getElementById('totalBookings').textContent = bookings.length;
+            
+            let totalSeats = 0;
+            bookings.forEach(booking => {
+                totalSeats += booking.seats.length;
+            });
+            document.getElementById('totalSeats').textContent = totalSeats;
+        }
+
+       async function cancelSingleBooking(bookingId) {
+    if (!confirm('이 예매를 취소하시겠습니까?')) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/admin/cancel-booking/${bookingId}`, {
+            method: 'POST'
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            alert('예매가 취소되었습니다.');
+            loadBookings(); // 목록 새로고침
+        } else {
+            alert(result.message);
+        }
+    } catch (error) {
+        alert('취소 처리 중 오류가 발생했습니다.');
+    }
+}
+
+        function refreshData() {
+            loadBookings();
+        }
+
+       function goHome() {
+    window.location.href = '/';
+        }
+function downloadExcel() {
+    window.location.href = '/api/admin/download-excel';
+}
+
+    </script>
+</body>
+</html>
+    </script>
+</body>
+</html>
