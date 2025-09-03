@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>예매 취소</title>
+    <style>
+        body { font-family: Arial; background: #f5f5f5; margin: 0; padding: 20px; }
+        .container { max-width: 500px; margin: 50px auto; background: white; padding: 40px; border-radius: 10px; }
+        .title { font-size: 24px; margin-bottom: 30px; text-align: center; }
+        .form-group { margin-bottom: 20px; }
+        .label { display: block; margin-bottom: 8px; font-weight: bold; }
+        .input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; }
+        .btn { width: 100%; padding: 15px; background: #e74c3c; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
+        .btn:hover { background: #c0392b; }
+        .back-btn { background: #3498db; margin-top: 10px; }
+        .back-btn:hover { background: #2980b9; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2 class="title">예매 취소</h2>
+        <div class="form-group">
+            <label class="label">이름</label>
+            <input type="text" id="name" class="input" required>
+        </div>
+        <div class="form-group">
+            <label class="label">이메일</label>
+            <input type="email" id="email" class="input" required>
+        </div>
+        <div class="form-group">
+            <label class="label">연락처</label>
+            <input type="tel" id="phone" class="input" required>
+        </div>
+        <button class="btn" onclick="cancelBooking()">예매 취소</button>
+        <button class="btn back-btn" onclick="goHome()">메인으로 돌아가기</button>
+    </div>
+
+    <script>
+        async function cancelBooking() {
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            
+            if (!name || !email || !phone) {
+                alert('모든 정보를 입력해주세요.');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/cancel-booking', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, phone })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('예매가 성공적으로 취소되었습니다.');
+                    document.getElementById('name').value = '';
+                    document.getElementById('email').value = '';
+                    document.getElementById('phone').value = '';
+                } else {
+                    alert(result.message);
+                }
+            } catch (error) {
+                alert('취소 처리 중 오류가 발생했습니다.');
+            }
+        }
+        
+        function goHome() {
+            window.location.href = '/';
+        }
+    </script>
+</body>
+</html>
