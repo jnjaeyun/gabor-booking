@@ -298,12 +298,13 @@ def download_excel():
         }), 500
 if __name__ == '__main__':
     init_db()
+    port = int(os.environ.get('PORT', 5000))
     print("🎬 가보르 보디 예매 시스템이 시작됩니다!")
-    print("👉 http://localhost:5000 에서 확인하세요")
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=False, host='0.0.0.0', port=port)
 else:
     # Vercel 배포용
     init_db()
+
 
 
 
