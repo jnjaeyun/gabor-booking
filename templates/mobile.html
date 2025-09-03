@@ -525,6 +525,7 @@
                     if (row === 'I' && col === 1) {
                         // I01은 빈 공간
                         const emptySpace = document.createElement('div');
+                        emptySpace.className = 'aisle-space';
                         seatingChart.appendChild(emptySpace);
                     } else {
                         const seat = document.createElement('div');
@@ -532,6 +533,8 @@
                         seat.className = 'seat';
                         seat.id = seatId;
                         seat.textContent = seatId;
+                        
+                        console.log('Creating seat:', seatId); // 디버그용
                         
                         if (unavailableSeats.includes(seatId)) {
                             seat.classList.add('unavailable');
