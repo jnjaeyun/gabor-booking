@@ -69,8 +69,11 @@ def send_cancellation_email(booking_data):
     mail.send(msg)
 @app.route('/')
 def index():
-    return render_template('index.html')
-
+    user_agent = request.headers.get('User-Agent', '')
+    if any(mobile in user_agent for mobile in ['Mobile', 'Android', 'iPhone', 'iPad']):
+        return render_template('mobile.html')
+    else:
+        return render_template('index.html')
 @app.route('/cancel')
 def cancel_page():
     return render_template('cancel.html')
@@ -304,6 +307,7 @@ if __name__ == '__main__':
 else:
     # Vercel 배포용
     init_db()
+
 
 
 
