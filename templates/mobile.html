@@ -348,6 +348,17 @@
             font-size: 0.85rem;
             color: #666;
         }
+        /* 좌석 차트 가로 스크롤 가능하게 */
+.seating-chart {
+  display: inline-grid; /* grid 그대로 쓰되 inline으로 */
+  grid-template-columns: repeat(18, 40px); /* 좌석 열 개수에 맞게 (예: 18칸) */
+  gap: 5px;
+}
+
+.seating-wrapper {
+  overflow-x: auto; /* 가로 스크롤 허용 */
+  -webkit-overflow-scrolling: touch; /* iOS 부드러운 스크롤 */
+}
     </style>
 </head>
 <body>
