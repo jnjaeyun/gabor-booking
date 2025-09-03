@@ -12,8 +12,9 @@ app = Flask(__name__)
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = 'jnjaeyun@gmail.com'
-app.config['MAIL_PASSWORD'] = 'focu hwst orep tdmz'
+import os
+app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME', 'jnjaeyun@gmail.com')
+app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD', 'focu hwst orep tdmz')
 app.config['SECRET_KEY'] = 'gabor-booking-secret'
 
 mail = Mail(app)
@@ -298,4 +299,5 @@ if __name__ == '__main__':
     init_db()
     print("🎬 가보르 보디 예매 시스템이 시작됩니다!")
     print("👉 http://localhost:5000 에서 확인하세요")
+
     app.run(debug=True, host='0.0.0.0', port=5000)
