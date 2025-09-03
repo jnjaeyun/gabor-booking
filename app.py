@@ -3,6 +3,7 @@ from flask_mail import Mail, Message
 import random
 import string
 import requests
+import os  # <- 이 줄 추가
 from datetime import datetime
 from database import init_db, get_booked_seats, save_booking, cancel_booking_by_info, cancel_all_bookings, get_booking_by_id, delete_booking_by_id
 
@@ -301,3 +302,4 @@ if __name__ == '__main__':
     print("👉 http://localhost:5000 에서 확인하세요")
 
     app.run(debug=True, host='0.0.0.0', port=5000)
+
