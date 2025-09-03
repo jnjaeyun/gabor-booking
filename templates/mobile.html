@@ -519,10 +519,11 @@
                 rowLabel.className = 'row-label';
                 rowLabel.textContent = row;
                 seatingChart.appendChild(rowLabel);
-                 // 첫 번째 통로 공간
+                   // 첫 번째 통로 공간
                 const aisleSpace1 = document.createElement('div');
                 aisleSpace1.className = 'aisle-space';
                 seatingChart.appendChild(aisleSpace1);
+                
                 // 왼쪽 블록: 01~04 (I01은 빈 공간)
                 for (let col = 1; col <= 4; col++) {
                     if (row === 'I' && col === 1) {
@@ -532,10 +533,80 @@
                         seatingChart.appendChild(emptySpace);
                     } else {
                         const seat = document.createElement('div');
-        네 번째 통로 공간
-                const aisleSpace3 = document.createElement('div');
+                        const seatId = row + String(col).padStart(2, '0');
+                        seat.className = 'seat';
+                        seat.id = seatId;
+                        seat.textContent = seatId;
+                        
+                        console.log('Creating seat:', seatId); // 디버그용
+                        
+                        if (unavailableSeats.includes(seatId)) {
+                            seat.classList.add('unavailable');
+                        } else {
+                            seat.classList.add('available');
+                            seat.onclick = () => toggleSeat(seatId);
+                        }
+                        
+                        seatingChart.appendChild(seat);
+                    }
+                }
+                
+                // 두 번째 통로 공간
+                const aisleSpace1 = document.createElement('div');
+                aisleSpace2.className = 'aisle-space';
+                seatingChart.appendChild(aisleSpace2);
+                
+                // 가운데 블록: 05~13
+                for (let col = 5; col <= 13; col++) {
+                    const seat = document.createElement('div');
+                    const seatId = row + String(col).padStart(2, '0');
+                    seat.className = 'seat';
+                    seat.id = seatId;
+                    seat.textContent = seatId;
+                    
+                    if (unavailableSeats.includes(seatId)) {
+                        seat.classList.add('unavailable');
+                    } else {
+                        seat.classList.add('available');
+                        seat.onclick = () => toggleSeat(seatId);
+                    }
+                    
+                    seatingChart.appendChild(seat);
+                }
+                
+                // 세 번째 통로 공간
+                const aisleSpace2 = document.createElement('div');
                 aisleSpace3.className = 'aisle-space';
                 seatingChart.appendChild(aisleSpace3);
+                
+                // 가운데 오른쪽 블록: 14~22 (I22는 빈 공간)
+                for (let col = 14; col <= 22; col++) {
+                    if (row === 'I' && col === 22) {
+                        // I22는 빈 공간
+                        const emptySpace = document.createElement('div');
+                        seatingChart.appendChild(emptySpace);
+                    } else {
+                        const seat = document.createElement('div');
+                        const seatId = row + String(col).padStart(2, '0');
+                        seat.className = 'seat';
+                        seat.id = seatId;
+                        seat.textContent = seatId;
+                        
+                        if (unavailableSeats.includes(seatId)) {
+                            seat.classList.add('unavailable');
+                        } else {
+                            seat.classList.add('available');
+                            seat.onclick = () => toggleSeat(seatId);
+                        }
+                        
+                        seatingChart.appendChild(seat);
+                    }
+                }
+                
+                // 네 번째 통로 공간
+                const aisleSpace3 = document.createElement('div');
+                aisleSpace4.className = 'aisle-space';
+                seatingChart.appendChild(aisleSpace4);
                 
                 // 오른쪽 블록: 23~26
                 for (let col = 23; col <= 26; col++) {
