@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>관리자 로그인</title>
+    <style>
+        body { font-family: Arial; background: #2c3e50; color: white; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .login-box { background: rgba(255,255,255,0.1); padding: 40px; border-radius: 10px; text-align: center; width: 300px; }
+        .title { font-size: 24px; margin-bottom: 30px; }
+        .input { width: 100%; padding: 12px; margin-bottom: 20px; border: none; border-radius: 5px; font-size: 16px; }
+        .btn { width: 100%; padding: 12px; background: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
+        .btn:hover { background: #2980b9; }
+        .back-btn { background: #95a5a6; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <div class="login-box">
+        <h2 class="title">관리자 로그인</h2>
+        <input type="password" id="password" class="input" placeholder="비밀번호 입력" onkeypress="handleEnter(event)">
+        <button class="btn" onclick="login()">로그인</button>
+        <button class="btn back-btn" onclick="goHome()">메인으로 돌아가기</button>
+    </div>
+
+    <script>
+        function handleEnter(event) {
+            if (event.key === 'Enter') {
+                login();
+            }
+        }
+
+        async function login() {
+            const password = document.getElementById('password').value;
+            
+            if (!password) {
+                alert('비밀번호를 입력해주세요.');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/admin/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password: password })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    window.location.href = '/admin/dashboard';
+                } else {
+                    alert(result.message);
+                    document.getElementById('password').value = '';
+                }
+            } catch (error) {
+                alert('로그인 처리 중 오류가 발생했습니다.');
+            }
+        }
+
+        function goHome() {
+            window.location.href = '/';
+        }
+    </script>
+</body>
+</html>
