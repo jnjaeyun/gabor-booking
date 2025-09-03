@@ -10,10 +10,10 @@ from database import init_db, get_booked_seats, save_booking, cancel_booking_by_
 app = Flask(__name__)
 
 # 이메일 설정
-app.config['MAIL_SERVER'] = 'smtp.gmail.com'
-app.config['MAIL_PORT'] = 587
-app.config['MAIL_USE_TLS'] = True
 import os
+app.config['MAIL_SERVER'] = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
+app.config['MAIL_PORT'] = int(os.environ.get('MAIL_PORT', '587'))
+app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME', 'jnjaeyun@gmail.com')
 app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD', 'focu hwst orep tdmz')
 app.config['SECRET_KEY'] = 'gabor-booking-secret'
@@ -302,4 +302,5 @@ if __name__ == '__main__':
     print("👉 http://localhost:5000 에서 확인하세요")
 
     app.run(debug=True, host='0.0.0.0', port=5000)
+
 
