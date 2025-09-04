@@ -24,17 +24,22 @@ def generate_booking_number():
 
 def send_confirmation_email(booking_data):
     try:
-        # Resend API 사용
         api_key = os.environ.get('RESEND_API_KEY')
+        print(f"API 키 존재 여부: {'있음' if api_key else '없음'}")
+        print(f"API 키 길이: {len(api_key) if api_key else 0}")
+        print(f"API 키 시작: {api_key[:15] if api_key else 'None'}")
+        
+        if not api_key or not api_key.startswith('re_'):
+            print("올바른 Resend API 키가 아닙니다")
+            return
         
         url = "https://api.resend.com/emails"
         
         data = {
-            "from": "gabor-booking@resend.dev",
+            "from": "onboarding@resend.dev",
             "to": [booking_data['email']],
             "subject": "예매 확인 - 가보르 보디 기획 상영 및 토크",
-            "html": f'''
-            <h2>예매 확인서</h2>
+            "html": f'''<h2>예매 확인서</h2>
             <div style="border: 1px solid #ddd; padding: 20px; border-radius: 10px;">
                 <h3>&lt;가보르 보디 기획 상영 및 토크&gt;</h3>
                 <p><strong>예매번호:</strong> {booking_data['booking_number']}</p>
@@ -43,8 +48,7 @@ def send_confirmation_email(booking_data):
                 <p><strong>일시:</strong> 2025년 9월 15일 (월) 17:00 ~ 21:00</p>
                 <hr>
                 <p>입장 시 본 이메일을 제시해주세요.</p>
-            </div>
-            '''
+            </div>'''
         }
         
         headers = {
@@ -52,38 +56,62 @@ def send_confirmation_email(booking_data):
             "Content-Type": "application/json"
         }
         
-        response = requests.post(url, json=data, headers=headers)
+        print(f"이메일 발송 요청 중...")
+        response = requests.post(url, json=data, headers=headers, timeout=10)
+        print(f"응답 코드: {response.status_code}")
+        print(f"응답 내용: {response.text}")
         
         if response.status_code == 200:
-            print(f"Resend 이메일 발송 성공: {booking_data['email']}")
+            print(f"이메일 발송 성공: {booking_data['email']}")
         else:
-            print(f"Resend 이메일 발송 실패: {response.status_code}")
-            
+            print(f"이메일 발송 실패: {response.status_code}")
+        
     except Exception as e:
-        print(f"이메일 발송 오류: {e}")
+        print(f"예외 발생: {str(e)}")
+
 def send_cancellation_email(booking_data):
     """예매 취소 확인 이메일 발송"""
-    msg = Message(
-        '예매 취소 확인 - 가보르 보디 기획 상영 및 토크',
-        sender=app.config['MAIL_USERNAME'],
-        recipients=[booking_data['email']]
-    )
-    
-    msg.html = f'''
-    <h2>예매 취소 확인</h2>
-    <div style="border: 1px solid #ddd; padding: 20px; border-radius: 10px; font-family: Arial;">
-        <h3>&lt;가보르 보디 기획 상영 및 토크&gt;</h3>
-        <p><strong>예매번호:</strong> {booking_data['booking_number']}</p>
-        <p><strong>이름:</strong> {booking_data['name']}</p>
-        <p><strong>좌석:</strong> {', '.join(booking_data['seats'])}</p>
-        <p><strong>일시:</strong> 2025년 9월 15일 (월) 17:00 ~ 21:00</p>
-        <hr>
-        <p style="color: #e74c3c; font-weight: bold;">예매가 취소되었습니다.</p>
-        <p style="color: #666;">궁금한 사항이 있으시면 문의해주세요.</p>
-    </div>
-    '''
-    
-    mail.send(msg)
+    try:
+        api_key = os.environ.get('RESEND_API_KEY')
+        
+        if not api_key or not api_key.startswith('re_'):
+            print("올바른 Resend API 키가 아닙니다")
+            return
+        
+        url = "https://api.resend.com/emails"
+        
+        data = {
+            "from": "onboarding@resend.dev",
+            "to": [booking_data['email']],
+            "subject": "예매 취소 확인 - 가보르 보디 기획 상영 및 토크",
+            "html": f'''<h2>예매 취소 확인</h2>
+            <div style="border: 1px solid #ddd; padding: 20px; border-radius: 10px; font-family: Arial;">
+                <h3>&lt;가보르 보디 기획 상영 및 토크&gt;</h3>
+                <p><strong>예매번호:</strong> {booking_data['booking_number']}</p>
+                <p><strong>이름:</strong> {booking_data['name']}</p>
+                <p><strong>좌석:</strong> {', '.join(booking_data['seats'])}</p>
+                <p><strong>일시:</strong> 2025년 9월 15일 (월) 17:00 ~ 21:00</p>
+                <hr>
+                <p style="color: #e74c3c; font-weight: bold;">예매가 취소되었습니다.</p>
+                <p style="color: #666;">궁금한 사항이 있으시면 문의해주세요.</p>
+            </div>'''
+        }
+        
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json"
+        }
+        
+        response = requests.post(url, json=data, headers=headers, timeout=10)
+        
+        if response.status_code == 200:
+            print(f"취소 이메일 발송 성공: {booking_data['email']}")
+        else:
+            print(f"취소 이메일 발송 실패: {response.status_code}")
+        
+    except Exception as e:
+        print(f"취소 이메일 발송 오류: {e}")
+
 @app.route('/')
 def index():
     user_agent = request.headers.get('User-Agent', '')
@@ -325,24 +353,3 @@ if __name__ == '__main__':
 else:
     # Vercel 배포용
     init_db()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
