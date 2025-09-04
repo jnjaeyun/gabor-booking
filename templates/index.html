@@ -906,7 +906,24 @@
             ['name', 'email', 'phone'].forEach(fieldId => {
                 document.getElementById(fieldId).addEventListener('input', updateSubmitButton);
             });
-        });
+       });
+
+        // 상영작 정보 모달 관련 함수
+        function showMovieInfo() {
+            document.getElementById('movieModal').style.display = 'block';
+        }
+
+        function closeMovieInfo() {
+            document.getElementById('movieModal').style.display = 'none';
+        }
+
+        // 모달 외부 클릭 시 닫기
+        window.onclick = function(event) {
+            const modal = document.getElementById('movieModal');
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
 </script>
 </body>
 </html>
