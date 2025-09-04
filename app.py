@@ -15,7 +15,7 @@ app.config['MAIL_PORT'] = 465  # 587에서 465로 변경
 app.config['MAIL_USE_TLS'] = False  # TLS 비활성화
 app.config['MAIL_USE_SSL'] = True   # SSL 활성화
 app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME', 'jnjaeyun@gmail.com')
-app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD', 'focu hwst orep tdmz')
+app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD', 'onog ktbq viwd ynti')
 app.config['SECRET_KEY'] = 'gabor-booking-secret'
 mail = Mail(app)
 
@@ -307,6 +307,7 @@ if __name__ == '__main__':
 else:
     # Vercel 배포용
     init_db()
+
 
 
 
