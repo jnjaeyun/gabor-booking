@@ -744,7 +744,7 @@
             }
         }
 
-        // 예매 제출 (실제 서버와 통신)
+        // 예매 제출 (완전히 수정된 버전)
         async function submitBooking() {
             const name = document.getElementById('name').value.trim();
             const email = document.getElementById('email').value.trim();
@@ -756,86 +756,95 @@
             }
 
             // 예매 진행 중 표시
-           const submitBtn = document.getElementById('submitBtn');
-           const originalText = submitBtn.textContent;
-           submitBtn.textContent = '예매 처리 중...';
-           submitBtn.disabled = true;
+            const submitBtn = document.getElementById('submitBtn');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = '예매 처리 중...';
+            submitBtn.disabled = true;
 
-           try {
-               // 서버로 예매 정보 전송
-               const bookingData = {
-                   name: name,
-                   email: email,
-                   phone: phone,
-                   seats: selectedSeats
-               };
+            try {
+                // 서버로 예매 정보 전송
+                const bookingData = {
+                    name: name,
+                    email: email,
+                    phone: phone,
+                    seats: selectedSeats
+                };
 
-               const response = await fetch('/api/booking', {
-                   method: 'POST',
-                   headers: {
-                       'Content-Type': 'application/json',
-                   },
-                   body: JSON.stringify(bookingData)
-               });
-               
-               const result = await response.json();
-               
-               if (result.success) {
-                   const bookingNumber = result.booking_number;
+                console.log('예매 데이터 전송:', bookingData);
 
-                   // 예매 완료 페이지에 정보 표시
-                   const confirmationDetails = document.getElementById('confirmationDetails');
-                   confirmationDetails.innerHTML = `
-                       <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0;">
-                           <h3 style="color: #2c3e50; margin-bottom: 15px;">예매 정보</h3>
-                           <p><strong>영화:</strong> &lt;가보르 보디 기획 상영 및 토크&gt;</p>
-                           <p><strong>일시:</strong> 2025년 9월 15일 (월) 17:00 ~ 21:00</p>
-                           <p><strong>좌석:</strong> ${selectedSeats.sort().join(', ')} (${selectedSeats.length}석)</p>
-                           <p><strong>이름:</strong> ${name}</p>
-                           <p><strong>이메일:</strong> ${email}</p>
-                           <p><strong>연락처:</strong> ${phone}</p>
-                           <p><strong>예매번호:</strong> ${bookingNumber}</p>
-                           <p style="color: #27ae60; font-weight: bold; margin-top: 15px;">예매가 완료되었습니다!</p>
-                       </div>
-                   `;
-                   
-                   showConfirmationPage();
-                   
-                   // 폼 초기화
-                   selectedSeats = [];
-                   document.getElementById('name').value = '';
-                   document.getElementById('email').value = '';
-                   document.getElementById('phone').value = '';
+                const response = await fetch('/api/booking', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(bookingData)
+                });
+                
+                console.log('서버 응답 상태:', response.status);
+                
+                // 응답이 JSON인지 확인
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    throw new Error('서버에서 올바른 응답을 받지 못했습니다.');
+                }
+                
+                const result = await response.json();
+                console.log('서버 응답 데이터:', result);
+                
+                if (result.success) {
+                    const bookingNumber = result.booking_number;
 
-               } else {
-                   throw new Error(result.message);
-               }
+                    // 예매 완료 페이지에 정보 표시
+                    const confirmationDetails = document.getElementById('confirmationDetails');
+                    confirmationDetails.innerHTML = `
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                            <h3 style="color: #2c3e50; margin-bottom: 15px;">예매 정보</h3>
+                            <p><strong>영화:</strong> &lt;가보르 보디 기획 상영 및 토크&gt;</p>
+                            <p><strong>일시:</strong> 2025년 9월 15일 (월) 17:00 ~ 21:00</p>
+                            <p><strong>좌석:</strong> ${selectedSeats.sort().join(', ')} (${selectedSeats.length}석)</p>
+                            <p><strong>이름:</strong> ${name}</p>
+                            <p><strong>이메일:</strong> ${email}</p>
+                            <p><strong>연락처:</strong> ${phone}</p>
+                            <p><strong>예매번호:</strong> ${bookingNumber}</p>
+                            <p style="color: #27ae60; font-weight: bold; margin-top: 15px;">예매가 완료되었습니다!</p>
+                        </div>
+                    `;
+                    
+                    showConfirmationPage();
+                    
+                    // 폼 초기화
+                    selectedSeats = [];
+                    document.getElementById('name').value = '';
+                    document.getElementById('email').value = '';
+                    document.getElementById('phone').value = '';
+                    updateSelectedSeatsInfo();
 
-           } catch (error) {
-               console.error('예매 처리 중 오류 발생:', error);
-               alert('예매 처리 중 오류가 발생했습니다: ' + error.message);
-               
-               // 버튼 복원
-               submitBtn.textContent = originalText;
-               submitBtn.disabled = false;
-           }
-       }
+                } else {
+                    throw new Error(result.message || '알 수 없는 오류가 발생했습니다.');
+                }
 
-       // 입력 필드 이벤트 리스너
-       document.addEventListener('DOMContentLoaded', function() {
-           ['name', 'email', 'phone'].forEach(fieldId => {
-               document.getElementById(fieldId).addEventListener('input', updateSubmitButton);
-           });
-       });
+            } catch (error) {
+                console.error('예매 처리 중 오류 발생:', error);
+                
+                let errorMessage = '예매 처리 중 오류가 발생했습니다.';
+                if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                    errorMessage = '서버 연결에 실패했습니다. 인터넷 연결을 확인해주세요.';
+                } else if (error.message) {
+                    errorMessage = error.message;
+                }
+                
+                alert(errorMessage);
+                
+                // 버튼 복원
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+                updateSubmitButton(); // 상태 재확인
+            }
+        }
 
-       // 페이지 이동 함수들
-       function goToCancel() {
-           window.location.href = '/cancel';
-       }
-
-       function goToAdmin() {
-           window.location.href = '/admin';
-       }
-   </script>
-</body>
-</html>
+        // 입력 필드 이벤트 리스너
+        document.addEventListener('DOMContentLoaded', function() {
+            ['name', 'email', 'phone'].forEach(fieldId => {
+                document.getElementById(fieldId).addEventListener('input', updateSubmitButton);
+            });
+        });
