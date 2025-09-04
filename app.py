@@ -24,28 +24,43 @@ def generate_booking_number():
 
 def send_confirmation_email(booking_data):
     try:
-        # EmailJS 웹훅 사용 (테스트용)
-        webhook_url = "https://api.emailjs.com/api/v1.0/email/send"
+        # Resend API 사용
+        api_key = os.environ.get('RESEND_API_KEY')
+        
+        url = "https://api.resend.com/emails"
         
         data = {
-            "service_id": "gmail",
-            "template_id": "template_1",
-            "user_id": "YOUR_USER_ID",
-            "template_params": {
-                "to_email": booking_data['email'],
-                "booking_number": booking_data['booking_number'],
-                "name": booking_data['name'],
-                "seats": ', '.join(booking_data['seats'])
-            }
+            "from": "gabor-booking@resend.dev",
+            "to": [booking_data['email']],
+            "subject": "예매 확인 - 가보르 보디 기획 상영 및 토크",
+            "html": f'''
+            <h2>예매 확인서</h2>
+            <div style="border: 1px solid #ddd; padding: 20px; border-radius: 10px;">
+                <h3>&lt;가보르 보디 기획 상영 및 토크&gt;</h3>
+                <p><strong>예매번호:</strong> {booking_data['booking_number']}</p>
+                <p><strong>이름:</strong> {booking_data['name']}</p>
+                <p><strong>좌석:</strong> {', '.join(booking_data['seats'])}</p>
+                <p><strong>일시:</strong> 2025년 9월 15일 (월) 17:00 ~ 21:00</p>
+                <hr>
+                <p>입장 시 본 이메일을 제시해주세요.</p>
+            </div>
+            '''
         }
         
-        response = requests.post(webhook_url, json=data)
-        print(f"EmailJS 응답: {response.status_code}")
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json"
+        }
         
+        response = requests.post(url, json=data, headers=headers)
+        
+        if response.status_code == 200:
+            print(f"Resend 이메일 발송 성공: {booking_data['email']}")
+        else:
+            print(f"Resend 이메일 발송 실패: {response.status_code}")
+            
     except Exception as e:
         print(f"이메일 발송 오류: {e}")
-    
-    mail.send(msg)
 def send_cancellation_email(booking_data):
     """예매 취소 확인 이메일 발송"""
     msg = Message(
@@ -310,6 +325,7 @@ if __name__ == '__main__':
 else:
     # Vercel 배포용
     init_db()
+
 
 
 
