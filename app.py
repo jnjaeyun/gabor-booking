@@ -211,6 +211,22 @@ def api_cancel_booking():
 def api_booking():
     try:
         data = request.json
+        
+        # 입력 데이터 검증
+        if not data:
+            return jsonify({
+                'success': False,
+                'message': '요청 데이터가 없습니다.'
+            }), 400
+            
+        required_fields = ['name', 'email', 'phone', 'seats']
+        for field in required_fields:
+            if not data.get(field):
+                return jsonify({
+                    'success': False,
+                    'message': f'{field} 필드가 필요합니다.'
+                }), 400
+        
         booking_number = generate_booking_number()
         
         booking_data = {
@@ -221,19 +237,23 @@ def api_booking():
             'seats': data['seats']
         }
         
+        # 먼저 데이터베이스에 저장
         if save_booking(booking_data):
-            # 이메일 발송
+            # 즉시 성공 응답 반환
+            response_data = {
+                'success': True,
+                'booking_number': booking_number,
+                'message': '예매가 완료되었습니다!'
+            }
+            
+            # 이메일은 백그라운드에서 발송 (실패해도 예매는 완료)
             try:
                 send_confirmation_email(booking_data)
                 print(f"예매 확인 메일 발송 완료: {booking_data['email']}")
             except Exception as e:
-                print(f"이메일 발송 오류: {e}")
+                print(f"이메일 발송 오류 (예매는 완료됨): {e}")
             
-            return jsonify({
-                'success': True,
-                'booking_number': booking_number,
-                'message': '예매가 완료되었습니다!'
-            })
+            return jsonify(response_data)
         else:
             return jsonify({
                 'success': False,
@@ -307,6 +327,7 @@ if __name__ == '__main__':
 else:
     # Vercel 배포용
     init_db()
+
 
 
 
