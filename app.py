@@ -222,6 +222,14 @@ def api_booking():
         }
         
         if save_booking(booking_data):
+            # 데이터베이스 저장 성공 후 이메일 발송
+            try:
+                send_confirmation_email(booking_data)
+                print(f"예매 확인 메일 발송 완료: {booking_data['email']}")
+            except Exception as e:
+                print(f"이메일 발송 오류: {e}")
+                # 이메일 실패해도 예매는 완료됨
+            
             return jsonify({
                 'success': True,
                 'booking_number': booking_number,
@@ -300,6 +308,7 @@ if __name__ == '__main__':
 else:
     # Vercel 배포용
     init_db()
+
 
 
 
